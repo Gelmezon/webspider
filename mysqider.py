@@ -33,8 +33,8 @@ for i in range(0,300):
   soup=BeautifulSoup(douban,"lxml")
 
   list_soup = soup.find_all('li', {'class': 'subject-item'})
-
-
+  if(len(list_soup)<10):
+      break
 
   for list in list_soup:
    page=str(list)
@@ -47,14 +47,10 @@ for i in range(0,300):
    if((float(fen[0].string))>8.8):
     write.writerow([title[0], writer, ls[0].string.strip(), fen[0].string])
     print  title[0]+"----"+ ls[0].string.strip()+"-----"+fen[0].string
-
    else:
       continue
  except:
-     if(len(page)>1):
-      io=io+1
-      if(io>5):
-          break
+     if(len(list_soup)>10):
       continue
      else:
          print "当前页数" + str(i + 1)
