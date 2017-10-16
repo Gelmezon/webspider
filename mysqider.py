@@ -14,18 +14,18 @@ filename ="F:\\131.csv."
 f=open(filename,"w")
 f.write(codecs.BOM_UTF8)
 write=csv.writer(f)
-
+io=0
 write.writerow(["书名","作者","出版信息","评分"])
 hds= [{'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'},
        {
            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11'},
        {'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)'}]
 
-for i in range(0,100):
+for i in range(0,300):
 
  try:
   time.sleep(5)
-  url="https://book.douban.com/tag/流行?start="+str(i*20)+"&type=T"
+  url="https://book.douban.com/tag/文学?start="+str(i*80)+"&type=T"
 
 
   douban= requests.get(url,hds[(i+3)%3]).text;
@@ -44,7 +44,7 @@ for i in range(0,100):
    ls=list.find_all('div',{"class":"pub"})
    fen=list.find_all('span',{"class":"rating_nums"})
    writer=((ls[0].string.strip()).split("/"))[0]
-   if((float(fen[0].string))>=9):
+   if((float(fen[0].string))>8.8):
     write.writerow([title[0], writer, ls[0].string.strip(), fen[0].string])
     print  title[0]+"----"+ ls[0].string.strip()+"-----"+fen[0].string
 
@@ -52,6 +52,9 @@ for i in range(0,100):
       continue
  except:
      if(len(page)>1):
+      io=io+1
+      if(io>5):
+          break
       continue
      else:
          print "当前页数" + str(i + 1)
