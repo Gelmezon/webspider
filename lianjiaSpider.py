@@ -13,9 +13,17 @@ sys.setdefaultencoding('utf8')
 
 db=MySQLdb.connect(host='localhost' , user='root' , passwd='mysql' , db='pythonTest' , charset="utf8")
 cursor=db.cursor()
-sqlcreate="CREATE TABLE `nanjing` (`houseid`  int(24) NOT NULL AUTO_INCREMENT, `房子描述`  varchar(200) NOT NULL ,`平米单价`  int(50)  ,`房子总价(万)`  int(20)  ,`地址`  varchar(200)  ,`住宅大小(平米)`  int(50)  ,`房间结构`  varchar(200)  ,`房子朝向`  varchar(20)  ,PRIMARY KEY (`houseid`));"
-cursor.execute(sqlcreate)
-db.commit()
+try:
+    sqlcreate="CREATE TABLE `nanjing` (`houseid`  int(24) NOT NULL AUTO_INCREMENT, `房子描述`  varchar(200) NOT NULL ,`平米单价`  int(50)  ,`房子总价(万)`  int(20)  ,`地址`  varchar(200)  ,`住宅大小(平米)`  int(50)  ,`房间结构`  varchar(200)  ,`房子朝向`  varchar(20)  ,PRIMARY KEY (`houseid`));"
+    cursor.execute(sqlcreate)
+    db.commit()
+except:
+    print "表单已经存在,清除表单....."
+    sqlcreate="delete  from nanjing "
+    cursor.execute(sqlcreate)
+    db.commit()
+
+
 hds= [{'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'},
        {
            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11'},
@@ -25,8 +33,8 @@ for pageNum in range(1,200):
   try:
    time.sleep(2.5)
    url = "https://nj.lianjia.com/ershoufang/pg"+str(pageNum)
-   gupiao = requests.get(url, hds[pageNum%3]).text
-   soup = BeautifulSoup(gupiao, "lxml")
+   fangzi = requests.get(url, hds[pageNum%3]).text
+   soup = BeautifulSoup(fangzi, "lxml")
    list_soup = soup.find_all("li", {"class": "clear"})
    for page in list_soup:
       titleDiv=page.find_all("div",{"class":"title"})[0].find_all("a")[0]
