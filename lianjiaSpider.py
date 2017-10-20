@@ -14,14 +14,19 @@ sys.setdefaultencoding('utf8')
 db=MySQLdb.connect(host='localhost' , user='root' , passwd='mysql' , db='pythonTest' , charset="utf8")
 cursor=db.cursor()
 try:
-    sqlcreate="CREATE TABLE `nanjing` (`houseid`  int(24) NOT NULL AUTO_INCREMENT, `房子描述`  varchar(200) NOT NULL ,`平米单价`  int(50)  ,`房子总价(万)`  int(20)  ,`地址`  varchar(200)  ,`住宅大小(平米)`  int(50)  ,`房间结构`  varchar(200)  ,`房子朝向`  varchar(20)  ,PRIMARY KEY (`houseid`));"
+    sqlcreate="CREATE TABLE `hangzhou` (`houseid`  int(24) NOT NULL AUTO_INCREMENT, `房子描述`  varchar(200) NOT NULL ,`平米单价`  int(50)  ,`房子总价(万)`  int(20)  ,`地址`  varchar(200)  ,`住宅大小(平米)`  int(50)  ,`房间结构`  varchar(200)  ,`房子朝向`  varchar(20)  ,PRIMARY KEY (`houseid`));"
     cursor.execute(sqlcreate)
     db.commit()
 except:
     print "表单已经存在,清除表单....."
-    sqlcreate="delete  from nanjing "
+    sqlcreate="drop table hangzhou "
     cursor.execute(sqlcreate)
     db.commit()
+    print  "清除完毕"
+    sqlcreate="CREATE TABLE `hangzhou` (`houseid`  int(24) NOT NULL AUTO_INCREMENT, `房子描述`  varchar(200) NOT NULL ,`平米单价`  int(50)  ,`房子总价(万)`  int(20)  ,`地址`  varchar(200)  ,`住宅大小(平米)`  int(50)  ,`房间结构`  varchar(200)  ,`房子朝向`  varchar(20)  ,PRIMARY KEY (`houseid`));"
+    cursor.execute(sqlcreate)
+    db.commit()
+
 
 
 hds= [{'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'},
@@ -32,7 +37,7 @@ hds= [{'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6
 for pageNum in range(1,200):
   try:
    time.sleep(2.5)
-   url = "https://nj.lianjia.com/ershoufang/pg"+str(pageNum)
+   url = "https://hz.lianjia.com/ershoufang/pg"+str(pageNum)
    fangzi = requests.get(url, hds[pageNum%3]).text
    soup = BeautifulSoup(fangzi, "lxml")
    list_soup = soup.find_all("li", {"class": "clear"})
@@ -54,7 +59,7 @@ for pageNum in range(1,200):
       priceInt= int(re.findall(patten,str(price))[0])
       TpriceInt=int(re.findall(patten1,str(Tprice))[0])
       houseaireint=int(re.findall(patten2,str(houseInfo[2]))[0])
-      sql="insert into nanjing VALUES (NULL ,'%s','%d','%d','%s','%d','%s','%s')"%(str(title),priceInt,TpriceInt,str(address),houseaireint,str(houseInfo[1]),str(houseInfo[3]))
+      sql="insert into hangzhou VALUES (NULL ,'%s','%d','%d','%s','%d','%s','%s')"%(str(title),priceInt,TpriceInt,str(address),houseaireint,str(houseInfo[1]),str(houseInfo[3]))
       try:
         cursor.execute(sql)
         db.commit()
@@ -65,5 +70,21 @@ for pageNum in range(1,200):
   except:
       print "抓取数据失败"
       continue
+try:
+       sqlE="CREATE TABLE `hzArea` (`地区`  varchar(255) NOT NULL ,`平均单价`  int(20) NULL ,`房源数量`  int(20) NULL ,`城市`  varchar(255)  NULL,PRIMARY KEY (`地区`));"
+       cursor.execute(sqlE)
+       db.commit()
+except:
+       sqlC="DELETE FROM hzArea"
+       cursor.execute(sqlC)
+       db.commit()
+
+finally:
+       sqlL="insert into hzArea (SELECT 地址,round(AVG (平米单价),0) 平米单价 ,COUNT(*) 房源数,地址 FROM  hangzhou GROUP BY 地址)"
+       sqlA="update hzarea set 城市='杭州'"
+       cursor.execute(sqlL)
+       db.commit()
+       cursor.execute(sqlA)
+       db.commit()
 db.close()
 
